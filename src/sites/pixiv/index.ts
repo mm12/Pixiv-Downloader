@@ -32,6 +32,7 @@ import { ReactiveValue } from '@/lib/reactiveValue.svelte';
 import { clientSetting } from '@/lib/store/clientSetting.svelte';
 import { legacyConfig } from '@/lib/store/legacyConfig';
 import { createHomeRecommendBtn } from './observerCB/createHomeRecommendBtn';
+import { startOriginalLinkWatcher } from './observerCB/originalLinkWatcher';
 
 export class Pixiv extends SiteInject {
   private firstObserverCbRunFlag = true;
@@ -297,6 +298,9 @@ export class Pixiv extends SiteInject {
     super.inject();
 
     this.downloadArtwork = this.downloadArtwork.bind(this);
+
+    // Start global watcher to inject populated titles on original-image links site-wide
+    startOriginalLinkWatcher();
 
     new MutationObserver((records) => {
       const addedElements: HTMLElement[] = records.flatMap((record) => {

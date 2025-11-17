@@ -1,7 +1,7 @@
 {
   "name": "pixiv-downloader",
   "private": true,
-  "version": "1.11.0",
+  "version": "1.11.10",
   "type": "module",
   "licenses": [
     {
@@ -61,6 +61,7 @@
   "dependencies": {
     "dayjs": "^1.11.11",
     "dexie": "^3.2.7",
+    "esbuild": "^0.27.0",
     "gif.js": "^0.2.0",
     "jszip": "^3.9.1",
     "mp4-muxer": "^5.1.5",

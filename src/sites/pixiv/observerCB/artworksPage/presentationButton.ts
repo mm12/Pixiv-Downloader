@@ -1,6 +1,7 @@
 import { regexp } from '@/lib/regExp';
 import { ThumbnailBtnType, ThumbnailButton } from '@/lib/components/Button/thumbnailButton';
 import { logger } from '@/lib/logger';
+import { injectOriginalLinkTitle } from '@/sites/pixiv/helpers/injectOriginalLinkTitle';
 
 let observer: MutationObserver | null;
 let btn: ThumbnailButton | null;
@@ -43,6 +44,13 @@ export function createPresentationBtn(
 
   containers.appendChild(btn);
 
+  // Populate the original link title with the configured save path for this page (single image)
+  void injectOriginalLinkTitle(id, unlistedId, {
+    selector: "[role='presentation'] a.gtm-expand-full-size-illust",
+    showNotice: false
+  });
+  console.log("PixivDL: injection attempted (presb)");
+
   // 跟踪多图id的img元素变化
   observer = new MutationObserver((mutationList) => {
     // mutationList[0] is the record that removes the img
@@ -59,6 +67,13 @@ export function createPresentationBtn(
       onClick: downloadArtwork
     });
     containers.appendChild(btn);
+
+    // Re-inject title for the updated page
+    void injectOriginalLinkTitle(id, unlistedId, {
+      selector: "[role='presentation'] a.gtm-expand-full-size-illust",
+      showNotice: false
+    });
+    console.log("PixivDL: injection attempted (pres)");
   });
   observer.observe(img.parentElement!, { childList: true, subtree: true });
 }
