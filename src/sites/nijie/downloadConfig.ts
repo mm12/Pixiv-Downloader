@@ -46,7 +46,7 @@ export class NijieDownloadConfig extends MayBeMultiIllustsConfig {
       date: this.createDate,
       score: String(this.score),
       title: this.normalizeString(this.title) || this.id,
-      tags: this.tags.join('_'),
+      tags: this.tags.join(' '),
       ...data
     };
   }
