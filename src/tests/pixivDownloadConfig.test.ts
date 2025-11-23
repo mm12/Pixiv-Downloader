@@ -82,6 +82,9 @@ describe('PixivDownloadConfig AI flag template', () => {
     const template = (config as any).getTemplateData({ page: '0' });
 
     expect(template.aiFlag).toBe(PIXIV_AI_FILENAME_FLAG);
+
+    const path = (config as any).getSavePath('', '{title}{aiFlag}', 'png', template);
+    expect(path).toBe('Title［AI］.png');
   });
 
   it('returns empty AI flag when artwork is not AI', () => {
@@ -90,5 +93,8 @@ describe('PixivDownloadConfig AI flag template', () => {
     const template = (config as any).getTemplateData({ page: '0' });
 
     expect(template.aiFlag).toBe('');
+
+    const path = (config as any).getSavePath('', '{title}{aiFlag}', 'png', template);
+    expect(path).toBe('Title.png');
   });
 });

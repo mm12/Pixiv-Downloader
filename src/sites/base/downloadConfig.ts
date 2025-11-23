@@ -127,7 +127,9 @@ export abstract class MediaDownloadConfig<T extends string | string[] = string> 
         if (!(templateName in data)) return match;
         const val = data[templateName];
 
-        return !val ? match : this.normalizeString(val);
+        if (val === undefined || val === null) return match;
+
+        return this.normalizeString(val);
       }
     );
 
