@@ -11,6 +11,7 @@ import { converter } from '@/lib/converter';
 import { GM_xmlhttpRequest } from '$';
 import { historyDb } from '@/lib/db';
 import type { QualityOption } from '@/lib/converter/adapter';
+import { PIXIV_AI_FILENAME_FLAG } from './aiDetection';
 
 interface PixivOptionBase extends OptionBase {
   useTranslatedTags: boolean;
@@ -31,6 +32,7 @@ export class PixivDownloadConfig extends MayBeMultiIllustsConfig {
   protected comment: string;
   protected translatedTags: string[];
   protected bookmarkCount: number;
+  protected aiFlag: string;
 
   constructor(mediaMeta: PixivMeta) {
     super(mediaMeta);
@@ -41,6 +43,7 @@ export class PixivDownloadConfig extends MayBeMultiIllustsConfig {
     this.comment = mediaMeta.comment;
     this.translatedTags = mediaMeta.tagsTranslated;
     this.bookmarkCount = mediaMeta.bookmarkCount;
+    this.aiFlag = mediaMeta.isAi ? PIXIV_AI_FILENAME_FLAG : '';
   }
 
   static get supportedTemplate() {
@@ -52,6 +55,7 @@ export class PixivDownloadConfig extends MayBeMultiIllustsConfig {
       [SupportedTemplate.PAGE]: '{page}',
       [SupportedTemplate.SCORE]: '{score}: bookmarkCount',
       [SupportedTemplate.TAGS]: '{tags}',
+      [SupportedTemplate.AI_FLAG]: '{aiFlag}',
       [SupportedTemplate.TITLE]: '{title}'
     };
   }
@@ -81,6 +85,7 @@ export class PixivDownloadConfig extends MayBeMultiIllustsConfig {
       score: String(this.bookmarkCount),
       title: this.normalizeString(this.title) || this.id,
       tags: this.tags.join(' '),
+      aiFlag: this.aiFlag,
       ...data
     };
   }

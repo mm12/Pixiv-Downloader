@@ -1,7 +1,7 @@
 {
   "name": "pixiv-downloader",
   "private": true,
-  "version": "1.11.01",
+  "version": "1.11.02",
   "type": "module",
   "licenses": [
     {

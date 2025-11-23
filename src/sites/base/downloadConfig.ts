@@ -15,6 +15,7 @@ export const enum SupportedTemplate {
   MD5 = 'md5',
   SCORE = 'score',
   TAGS = 'tags',
+  AI_FLAG = 'aiFlag',
   TITLE = 'title',
   PAGE = 'page'
 }
@@ -112,6 +113,7 @@ export abstract class MediaDownloadConfig<T extends string | string[] = string> 
         `${SupportedTemplate.CHARACTER}|` +
         `${SupportedTemplate.ID}|` +
         `${SupportedTemplate.MD5}|` +
+        `${SupportedTemplate.AI_FLAG}|` +
         `${SupportedTemplate.PAGE}|` +
         `${SupportedTemplate.SCORE}|` +
         `${SupportedTemplate.TAGS}|` +

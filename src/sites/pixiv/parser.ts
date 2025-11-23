@@ -15,6 +15,7 @@ import type {
 import type { MediaMeta } from '@/sites/base/parser';
 import { getElementText } from '@/lib/util';
 import { IllustType } from './types';
+import { detectAiFlag } from './aiDetection';
 import { pixivApi } from '@/sites/pixiv/api';
 import { logger } from '@/lib/logger';
 import type {
@@ -31,6 +32,7 @@ interface PixivMetaBase<T extends string | string[]> extends MediaMeta<T> {
   bookmarkData: ArtworkDetail['bookmarkData'];
   likeData: boolean;
   bookmarkCount: number;
+  isAi: boolean;
 }
 
 export interface PixivIllustMeta<T extends string | string[] = string> extends PixivMetaBase<T> {
@@ -96,6 +98,7 @@ export const pixivParser: PixivParser = {
     let illustData: ArtworkDetail;
     let token: string;
     const { tagLang, type } = param;
+    let artworkDoc: Document | undefined;
 
     if (type === 'api') {
       illustData = await pixivApi.getArtworkDetail(illustId, tagLang);
@@ -105,6 +108,7 @@ export const pixivParser: PixivParser = {
       token = '';
     } else {
       const doc = await pixivApi.getArtworkDoc(illustId, tagLang);
+      artworkDoc = doc;
       const preloadDataEl = doc.querySelector<HTMLMetaElement>('meta[name="preload-data"]');
       const globalDataEl = doc.querySelector<HTMLMetaElement>('meta[name="global-data"]');
 
@@ -149,6 +153,13 @@ export const pixivParser: PixivParser = {
       tagsTranslatedArr.push(tagData.translation?.en || tagData.tag);
     });
 
+    const isAi = detectAiFlag({
+      aiType: illustData.aiType,
+      tags: tagsArr,
+      translatedTags: tagsTranslatedArr,
+      badgeRoot: artworkDoc
+    });
+
     // Coment
     const unescapeComment = illustComment
       .replaceAll(/&lt;|&amp;lt;/g, '<')
@@ -171,7 +182,8 @@ export const pixivParser: PixivParser = {
       createDate,
       likeData,
       token,
-      bookmarkCount
+      bookmarkCount,
+      isAi
     };
 
     if (illustType === IllustType.ugoira) {
