@@ -47,6 +47,8 @@ export abstract class MediaDownloadConfig<T extends string | string[] = string> 
 
   protected onDownloadCompleted: (() => void) | undefined = undefined;
 
+  private pagePaddingWidth: number | undefined = undefined;
+
   protected constructor(mediaMeta: MediaMeta<T>) {
     const { id, src, extendName, artist, title, tags, createDate } = mediaMeta;
 
@@ -129,7 +131,10 @@ export abstract class MediaDownloadConfig<T extends string | string[] = string> 
 
         if (val === undefined || val === null) return match;
 
-        return this.normalizeString(val);
+        const valueToNormalize =
+          templateName === SupportedTemplate.PAGE ? this.formatPagePlaceholder(val) : val;
+
+        return this.normalizeString(valueToNormalize);
       }
     );
 
@@ -165,6 +170,27 @@ export abstract class MediaDownloadConfig<T extends string | string[] = string> 
   protected abstract getTemplateData(data?: Partial<TemplateData>): Partial<TemplateData>;
 
   abstract create(option: OptionBase): DownloadConfig | DownloadConfig[];
+
+  private getPagePaddingWidth(): number {
+    if (this.pagePaddingWidth !== undefined) return this.pagePaddingWidth;
+
+    const maxIndex = Math.max(this.total - 1, 0);
+    const width = Math.max(String(maxIndex).length, String(Math.max(this.total, 0)).length);
+
+    this.pagePaddingWidth = width || 1;
+
+    return this.pagePaddingWidth;
+  }
+
+  private formatPagePlaceholder(value: string): string {
+    if (!/^[0-9]+$/.test(value)) return value;
+
+    const width = this.getPagePaddingWidth();
+
+    if (value.length >= width) return value;
+
+    return value.padStart(width, '0');
+  }
 }
 
 export interface IndexOption extends OptionBase {

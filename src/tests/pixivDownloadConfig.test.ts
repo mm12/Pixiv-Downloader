@@ -3,6 +3,7 @@ import { IllustType } from '@/sites/pixiv/types';
 import { SupportedTemplate } from '@/sites/base/downloadConfig';
 import { PIXIV_AI_FILENAME_FLAG } from '@/sites/pixiv/aiDetection';
 import type { PixivIllustMeta } from '@/sites/pixiv/parser';
+import { FilenameConflictAction } from '@/lib/downloader/fileSaveAdapters/fileSystemAccess';
 
 vi.mock('@/lib/env', () => ({
   env: {
@@ -17,7 +18,8 @@ vi.mock('@/lib/env', () => ({
 }));
 
 vi.mock('$', () => ({
-  GM_xmlhttpRequest: vi.fn()
+  GM_xmlhttpRequest: vi.fn(),
+  unsafeWindow: {}
 }));
 
 vi.mock('@/lib/db', () => ({
@@ -52,25 +54,26 @@ beforeAll(async () => {
   ({ PixivDownloadConfig } = await import('@/sites/pixiv/downloadConfig'));
 });
 
+const baseMeta: PixivIllustMeta = {
+  id: '123',
+  src: 'https://example.com/illust.png',
+  extendName: 'png',
+  artist: 'Artist',
+  title: 'Title',
+  tags: ['tag'],
+  tagsTranslated: ['tag'],
+  userId: '42',
+  comment: '',
+  token: '',
+  bookmarkData: null,
+  createDate: '2025-01-01T00:00:00Z',
+  likeData: false,
+  bookmarkCount: 100,
+  isAi: false,
+  illustType: IllustType.illusts
+};
+
 describe('PixivDownloadConfig AI flag template', () => {
-  const baseMeta: PixivIllustMeta = {
-    id: '123',
-    src: 'https://example.com/illust.png',
-    extendName: 'png',
-    artist: 'Artist',
-    title: 'Title',
-    tags: ['tag'],
-    tagsTranslated: ['tag'],
-    userId: '42',
-    comment: '',
-    token: '',
-    bookmarkData: null,
-    createDate: '2025-01-01T00:00:00Z',
-    likeData: false,
-    bookmarkCount: 100,
-    isAi: false,
-    illustType: IllustType.illusts
-  };
 
   it('exposes {aiFlag} placeholder', () => {
     expect(PixivDownloadConfig.supportedTemplate[SupportedTemplate.AI_FLAG]).toBe('{aiFlag}');
@@ -96,5 +99,33 @@ describe('PixivDownloadConfig AI flag template', () => {
 
     const path = (config as any).getSavePath('', '{title}{aiFlag}', 'png', template);
     expect(path).toBe('Title.png');
+  });
+});
+
+describe('PixivDownloadConfig page template', () => {
+  const baseOption = {
+    directoryTemplate: '',
+    filenameTemplate: '{page}',
+    useFileSystemAccessApi: false,
+    filenameConflictAction: FilenameConflictAction.UNIQUIFY,
+    useTranslatedTags: false
+  } as const;
+
+  it('pads page numbers based on total pages', () => {
+    const pages = 15;
+    const multiMeta = {
+      ...baseMeta,
+      src: Array.from({ length: pages }, (_, i) => `https://example.com/illust-${i}.png`),
+      extendName: Array.from({ length: pages }, () => 'png'),
+      illustType: IllustType.manga
+    } as PixivIllustMeta<string[]>;
+
+    const config = new PixivDownloadConfig(multiMeta);
+
+    const downloads = config.createMulti({ ...baseOption });
+
+    expect(downloads[0]?.path).toBe('00.png');
+    expect(downloads[9]?.path).toBe('09.png');
+    expect(downloads[pages - 1]?.path).toBe('14.png');
   });
 });
