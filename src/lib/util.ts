@@ -19,6 +19,11 @@ export function replaceInvalidChar(str: string): string {
     .replace(/</g, '﹤')
     .replace(/>/g, '﹥')
     .replace(/~/g, '～')
+    .replace(/\s+/g,' ')
+    .replace(/\]/g,'】')
+    .replace(/\[/g,'【')
+    .replace(/\(/g,'（')
+    .replace(/\)/g,'）')
     .trim()
     .replace(/^\.|\.$/g, '．'); //头尾'.'
 }
