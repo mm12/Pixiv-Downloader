@@ -3,6 +3,8 @@ import { pixivParser } from '@/sites/pixiv/parser';
 import { downloadSetting } from '@/lib/store/downloadSetting.svelte';
 import { siteFeature, PixivTagLocale } from '@/lib/store/siteFeature.svelte';
 
+// TODO: fix bug where navigating to next work on sme page doesn't fetch the current info, nd injects stale info
+
 export type InjectOptions = {
   selector?: string;
   showNotice?: boolean;

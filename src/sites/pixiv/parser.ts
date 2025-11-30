@@ -144,6 +144,7 @@ export const pixivParser: PixivParser = {
       bookmarkData,
       likeData,
       bookmarkCount
+      // TODO: add capability to fetch series title and number as well, or a way to download as
     } = illustData;
 
     const tagsArr: string[] = [];
