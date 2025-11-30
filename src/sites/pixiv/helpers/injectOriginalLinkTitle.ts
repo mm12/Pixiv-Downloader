@@ -3,7 +3,7 @@ import { pixivParser } from '@/sites/pixiv/parser';
 import { downloadSetting } from '@/lib/store/downloadSetting.svelte';
 import { siteFeature, PixivTagLocale } from '@/lib/store/siteFeature.svelte';
 
-// TODO: fix bug where navigating to next work on sme page doesn't fetch the current info, nd injects stale info
+// TODO: fix bug where navigating to next work on sme page doesn't fetch the current info, and injects stale info
 
 export type InjectOptions = {
   selector?: string;
@@ -45,9 +45,14 @@ export async function injectOriginalLinkTitle(
     ...(opts || {})
   };
 
+  const currentKey = unlistedId ?? id;
+
+  // Query anchors that either haven't been injected at all, or were injected
+  // for a different artwork (so they need updating when navigating within
+  // the same single-page experience).
   const queryTargets = () =>
     Array.from(document.querySelectorAll<HTMLAnchorElement>(selector!)).filter(
-      (a) => !a.dataset.pdlInjected
+      (a) => a.dataset.pdlInjected !== '1' || a.dataset.pdlInjectedId !== currentKey
     );
 
   const tryInject = async () => {
@@ -75,19 +80,23 @@ export async function injectOriginalLinkTitle(
       : [new PixivDownloadConfig(meta).create(option)];
 
     let injected = 0;
-    const total = Math.min(targets.length, configs.length);
+    const total = targets.length;
 
+    // If there are fewer configs than targets (e.g. same image referenced
+    // multiple times), reuse the first config for extra targets so every
+    // anchor gets a path.
     for (let i = 0; i < total; i++) {
       const link = targets[i];
-      const cfg = configs[i];
+      const cfg = configs[i] ?? configs[0];
       if (cfg && cfg.path) {
         link.title = cfg.path;
         link.dataset.pdlInjected = '1';
+        link.dataset.pdlInjectedId = currentKey;
         injected++;
       }
     }
 
-    return { injected, total: targets.length };
+    return { injected, total };
   };
 
   // Immediate attempt + retries
