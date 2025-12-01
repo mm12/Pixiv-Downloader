@@ -32,6 +32,7 @@ export class PixivDownloadConfig extends MayBeMultiIllustsConfig {
   protected comment: string;
   protected translatedTags: string[];
   protected bookmarkCount: number;
+  protected totalPages: number;
   protected aiFlag: string;
 
   constructor(mediaMeta: PixivMeta) {
@@ -43,6 +44,7 @@ export class PixivDownloadConfig extends MayBeMultiIllustsConfig {
     this.comment = mediaMeta.comment;
     this.translatedTags = mediaMeta.tagsTranslated;
     this.bookmarkCount = mediaMeta.bookmarkCount;
+    this.totalPages = mediaMeta.totalPages;
     this.aiFlag = mediaMeta.isAi ? PIXIV_AI_FILENAME_FLAG : '';
   }
 
@@ -53,10 +55,13 @@ export class PixivDownloadConfig extends MayBeMultiIllustsConfig {
       [SupportedTemplate.ARTISTID]: '{artistID}',
       [SupportedTemplate.DATE]: '{date} {date(YYYY-MM-DD)}',
       [SupportedTemplate.PAGE]: '{page}',
+      [SupportedTemplate.FIXED_PAGE]: '{fixedPage}',
       [SupportedTemplate.SCORE]: '{score}: bookmarkCount',
       [SupportedTemplate.TAGS]: '{tags}',
       [SupportedTemplate.AI_FLAG]: '{aiFlag}',
       [SupportedTemplate.TITLE]: '{title}'
+      ,
+      [SupportedTemplate.TOTAL_PAGES]: '{totalPages}'
     };
   }
 
@@ -86,6 +91,8 @@ export class PixivDownloadConfig extends MayBeMultiIllustsConfig {
       title: this.normalizeString(this.title) || this.id,
       tags: this.tags.join(' '),
       aiFlag: this.aiFlag,
+      totalPages: String(this.totalPages),
+      fixedPage: String(Number(data.page) + 1),
       ...data
     };
   }

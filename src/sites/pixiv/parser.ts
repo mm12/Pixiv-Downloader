@@ -33,6 +33,7 @@ interface PixivMetaBase<T extends string | string[]> extends MediaMeta<T> {
   likeData: boolean;
   bookmarkCount: number;
   isAi: boolean;
+  totalPages: number;
 }
 
 export interface PixivIllustMeta<T extends string | string[] = string> extends PixivMetaBase<T> {
@@ -144,7 +145,8 @@ export const pixivParser: PixivParser = {
       bookmarkData,
       likeData,
       bookmarkCount
-      // TODO: add capability to fetch series title and number as well, or a way to download as
+      // long term TODO: add capability to fetch series title and number as well, or a way to download as
+      // TODO: add total pages as a param
     } = illustData;
 
     const tagsArr: string[] = [];
@@ -184,7 +186,8 @@ export const pixivParser: PixivParser = {
       likeData,
       token,
       bookmarkCount,
-      isAi
+      isAi,
+      totalPages: pageCount
     };
 
     if (illustType === IllustType.ugoira) {
@@ -201,7 +204,8 @@ export const pixivParser: PixivParser = {
         src,
         extendName,
         illustType,
-        ugoiraMeta
+        ugoiraMeta,
+        totalPages: pageCount
       };
     } else if (pageCount > 1) {
       const src = Array.from({ length: pageCount }, (_, i) => meta.src.replace('_p0', '_p' + i));
@@ -211,7 +215,8 @@ export const pixivParser: PixivParser = {
         ...meta,
         src,
         extendName,
-        illustType
+        illustType,
+        totalPages: pageCount
       };
     } else {
       return {

@@ -17,7 +17,9 @@ export const enum SupportedTemplate {
   TAGS = 'tags',
   AI_FLAG = 'aiFlag',
   TITLE = 'title',
-  PAGE = 'page'
+  PAGE = 'page',
+  FIXED_PAGE = 'fixedPage',
+  TOTAL_PAGES = 'totalPages'
 }
 
 export type TemplateData = {
@@ -117,6 +119,8 @@ export abstract class MediaDownloadConfig<T extends string | string[] = string> 
         `${SupportedTemplate.MD5}|` +
         `${SupportedTemplate.AI_FLAG}|` +
         `${SupportedTemplate.PAGE}|` +
+        `${SupportedTemplate.FIXED_PAGE}|` +
+        `${SupportedTemplate.TOTAL_PAGES}|` +
         `${SupportedTemplate.SCORE}|` +
         `${SupportedTemplate.TAGS}|` +
         `${SupportedTemplate.TITLE})}`,
@@ -132,7 +136,9 @@ export abstract class MediaDownloadConfig<T extends string | string[] = string> 
         if (val === undefined || val === null) return match;
 
         const valueToNormalize =
-          templateName === SupportedTemplate.PAGE ? this.formatPagePlaceholder(val) : val;
+          templateName === SupportedTemplate.PAGE || templateName === SupportedTemplate.FIXED_PAGE
+            ? this.formatPagePlaceholder(val)
+            : val;
 
         return this.normalizeString(valueToNormalize);
       }
