@@ -4,7 +4,7 @@ import { downloadSetting } from '@/lib/store/downloadSetting.svelte';
 import { siteFeature, PixivTagLocale } from '@/lib/store/siteFeature.svelte';
 
 // TODO: fix bug where navigating to next work on sme page doesn't fetch the current info, and injects stale info
-
+// TODO: fix bug where pages (gtm-expand-full-size-illust?) load too slowly and the page number is wrong and/or title doesn't get injected soon enough
 export type InjectOptions = {
   selector?: string;
   showNotice?: boolean;
