@@ -1,7 +1,11 @@
 export const PIXIV_AI_KEYWORDS = [
-  'AI-generated',
-  'StableDiffusion',
-  'NovelAI'
+    "AI-generated",
+    "StableDiffusion",
+    "NovelAI",
+    "AI生成",
+    "AIイラスト",
+    "AI漫画",
+    "AI生成",
 ];
 
 export const PIXIV_AI_FILENAME_FLAG = '［AI］';
