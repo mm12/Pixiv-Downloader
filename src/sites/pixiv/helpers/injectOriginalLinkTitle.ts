@@ -5,6 +5,7 @@ import { siteFeature, PixivTagLocale } from '@/lib/store/siteFeature.svelte';
 
 // TODO: fix bug where navigating to next work on sme page doesn't fetch the current info, and injects stale info
 // TODO: fix bug where pages (gtm-expand-full-size-illust?) load too slowly and the page number is wrong and/or title doesn't get injected soon enough
+//  --> note: sometimes these long images also forget about the page `1`, resulting in both page 0 and page 1 being page 1?
 export type InjectOptions = {
   selector?: string;
   showNotice?: boolean;
@@ -82,12 +83,44 @@ export async function injectOriginalLinkTitle(
     let injected = 0;
     const total = targets.length;
 
-    // If there are fewer configs than targets (e.g. same image referenced
-    // multiple times), reuse the first config for extra targets so every
-    // anchor gets a path.
+    // Try to match anchors to configs by image filename (more robust when
+    // viewer reuses DOM nodes or inserts anchors out-of-order). Fall back to
+    // index-based mapping when no filename match found.
+    const getFilename = (u: string) => {
+      try {
+        return decodeURIComponent(new URL(u).pathname.split('/').pop() || u);
+      } catch {
+        return u;
+      }
+    };
+
+    const configMap = new Map<string, any[]>();
+    configs.forEach((c) => {
+      const fn = typeof c.src === 'string' ? getFilename(c.src) : String(c.src);
+      const arr = configMap.get(fn) ?? [];
+      arr.push(c);
+      configMap.set(fn, arr);
+    });
+
     for (let i = 0; i < total; i++) {
       const link = targets[i];
-      const cfg = configs[i] ?? configs[0];
+
+      // Prefer exact filename match between anchor href and config.src
+      let cfg: any | undefined;
+      try {
+        const linkFn = getFilename(link.href);
+        const arr = configMap.get(linkFn);
+        if (arr && arr.length) {
+          cfg = arr.shift();
+          if (arr.length === 0) configMap.delete(linkFn);
+        }
+      } catch (e) {
+        // ignore and fallback
+      }
+
+      // Fallback to index-based mapping when no filename match found
+      if (!cfg) cfg = configs[i] ?? configs[0];
+
       if (cfg && cfg.path) {
         link.title = cfg.path;
         link.dataset.pdlInjected = '1';
