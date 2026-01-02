@@ -122,7 +122,8 @@ export async function injectOriginalLinkTitle(
       if (!cfg) cfg = configs[i] ?? configs[0];
 
       if (cfg && cfg.path) {
-        link.title = cfg.path;
+        // Remove the final file extension from the path when injecting title
+        link.title = cfg.path.replace(/\.[^/.]+$/, '');
         link.dataset.pdlInjected = '1';
         link.dataset.pdlInjectedId = currentKey;
         injected++;
