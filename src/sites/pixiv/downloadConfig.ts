@@ -33,6 +33,8 @@ export class PixivDownloadConfig extends MayBeMultiIllustsConfig {
   protected translatedTags: string[];
   protected bookmarkCount: number;
   protected totalPages: number;
+  protected seriesName: string | undefined;
+  protected seriesPart: string | undefined;
   protected aiFlag: string;
 
   constructor(mediaMeta: PixivMeta) {
@@ -45,6 +47,8 @@ export class PixivDownloadConfig extends MayBeMultiIllustsConfig {
     this.translatedTags = mediaMeta.tagsTranslated;
     this.bookmarkCount = mediaMeta.bookmarkCount;
     this.totalPages = mediaMeta.totalPages;
+    this.seriesName = 'seriesName' in mediaMeta ? mediaMeta.seriesName : undefined;
+    this.seriesPart = 'seriesPart' in mediaMeta ? mediaMeta.seriesPart : undefined;
     this.aiFlag = mediaMeta.isAi ? PIXIV_AI_FILENAME_FLAG : '';
   }
 
@@ -59,6 +63,8 @@ export class PixivDownloadConfig extends MayBeMultiIllustsConfig {
       [SupportedTemplate.SCORE]: '{score}: bookmarkCount',
       [SupportedTemplate.TAGS]: '{tags}',
       [SupportedTemplate.AI_FLAG]: '{aiFlag}',
+      [SupportedTemplate.SERIES_NAME]: '{series_name}',
+      [SupportedTemplate.SERIES_PART]: '{series_part}',
       [SupportedTemplate.TITLE]: '{title}'
       ,
       [SupportedTemplate.TOTAL_PAGES]: '{totalPages}'
@@ -91,6 +97,8 @@ export class PixivDownloadConfig extends MayBeMultiIllustsConfig {
       title: this.normalizeString(this.title) || this.id,
       tags: this.tags.join(' '),
       aiFlag: this.aiFlag,
+      series_name: this.seriesName || '',
+      series_part: this.seriesPart ? String(this.seriesPart) : '',
       totalPages: String(this.totalPages),
       fixedPage: String(Number(data.page) + 1),
       ...data

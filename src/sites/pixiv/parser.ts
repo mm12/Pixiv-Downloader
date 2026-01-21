@@ -34,6 +34,8 @@ interface PixivMetaBase<T extends string | string[]> extends MediaMeta<T> {
   bookmarkCount: number;
   isAi: boolean;
   totalPages: number;
+  seriesName?: string;
+  seriesPart?: string;
 }
 
 export interface PixivIllustMeta<T extends string | string[] = string> extends PixivMetaBase<T> {
@@ -171,6 +173,32 @@ export const pixivParser: PixivParser = {
     p.innerHTML = unescapeComment;
     const comment = getElementText(p);
 
+    let seriesName: string | undefined = undefined;
+    let seriesPart: string | undefined = undefined;
+    // Try to get series info from API data if available
+    if ((illustData as any).seriesNavData) {
+      const nav = (illustData as any).seriesNavData;
+      if (nav.title) seriesName = String(nav.title).trim();
+      if (typeof nav.order === 'number' || nav.order) seriesPart = String(nav.order);
+    }
+    if (artworkDoc) {
+      const figcaption = artworkDoc.querySelector('figcaption');
+      if (figcaption) {
+        const seriesLink = figcaption.querySelector<HTMLAnchorElement>('a[href*="/series/"]');
+        if (seriesLink) {
+            const txt = seriesLink.textContent?.trim() || '';
+            const partRegex = /#\s*(\d+)/;
+            const partMatch = partRegex.exec(txt);
+            if (partMatch) {
+              seriesPart = partMatch[1];
+              seriesName = txt.slice(0, partMatch.index).replace(/[}\s]+$/, '').trim();
+            } else {
+              seriesName = txt.replace(/[}\s#]+$/, '').trim();
+            }
+        }
+      }
+    }
+
     const meta = {
       id,
       src: urls.original,
@@ -187,7 +215,9 @@ export const pixivParser: PixivParser = {
       token,
       bookmarkCount,
       isAi,
-      totalPages: pageCount
+      totalPages: pageCount,
+      seriesName,
+      seriesPart
     };
 
     if (illustType === IllustType.ugoira) {

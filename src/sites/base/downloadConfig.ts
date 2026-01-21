@@ -17,6 +17,8 @@ export const enum SupportedTemplate {
   TAGS = 'tags',
   AI_FLAG = 'aiFlag',
   TITLE = 'title',
+  SERIES_NAME = 'series_name',
+  SERIES_PART = 'series_part',
   PAGE = 'page',
   FIXED_PAGE = 'fixedPage',
   TOTAL_PAGES = 'totalPages'
@@ -118,6 +120,8 @@ export abstract class MediaDownloadConfig<T extends string | string[] = string> 
         `${SupportedTemplate.ID}|` +
         `${SupportedTemplate.MD5}|` +
         `${SupportedTemplate.AI_FLAG}|` +
+        `${SupportedTemplate.SERIES_NAME}|` +
+        `${SupportedTemplate.SERIES_PART}|` +
         `${SupportedTemplate.PAGE}|` +
         `${SupportedTemplate.FIXED_PAGE}|` +
         `${SupportedTemplate.TOTAL_PAGES}|` +
@@ -138,6 +142,8 @@ export abstract class MediaDownloadConfig<T extends string | string[] = string> 
         const valueToNormalize =
           templateName === SupportedTemplate.PAGE || templateName === SupportedTemplate.FIXED_PAGE
             ? this.formatPagePlaceholder(val)
+            : templateName === SupportedTemplate.SERIES_PART && /^[0-9]+$/.test(val)
+            ? val.padStart(2, '0')
             : val;
 
         return this.normalizeString(valueToNormalize);
@@ -165,11 +171,12 @@ export abstract class MediaDownloadConfig<T extends string | string[] = string> 
     ext: string,
     templateData: Partial<TemplateData>
   ): string {
-    const path = this.#replaceTemplate(
+    let path = this.#replaceTemplate(
       this.getPathTemplate(folderTemplate, filenameTemplate),
       templateData
     );
-
+    // Remove double slashes, trailing spaces, and space-before-slash after replacement
+    path = path.replace(/\/\/+|\/\s+| \//g, '/');
     return `${path}.${ext}`;
   }
 
